@@ -1,0 +1,62 @@
+package com.example.nirvoy;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.database.FirebaseDatabase;
+
+public class Contacts extends AppCompatActivity {
+
+    private RecyclerView recyclerView;
+    private ContactAdapter adapter;
+    private FloatingActionButton add;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_contacts);
+
+        recyclerView = findViewById(R.id.recycler);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        FirebaseRecyclerOptions<ContactData> options =
+                new FirebaseRecyclerOptions.Builder<ContactData>()
+                        .setQuery(FirebaseDatabase.getInstance().getReference().child("ContactDatas"), ContactData.class)
+                        .build();
+
+        adapter = new ContactAdapter(options,this);
+        recyclerView.setAdapter(adapter);
+
+        add = findViewById(R.id.add);
+        add.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(Contacts.this,  AddContact.class));
+            }
+        });
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        adapter.startListening();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        adapter.stopListening();
+    }
+}
+
+
+
+

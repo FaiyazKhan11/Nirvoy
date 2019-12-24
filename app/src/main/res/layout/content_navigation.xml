@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context=".NavigationActivity"
+    android:gravity="center"
+    android:orientation="vertical"
+    tools:showIn="@layout/app_bar_navigation">
+
+    <Button
+        android:id="@+id/medical"
+        style="@style/Widget.AppCompat.Button.Colored"
+        android:layout_width="182dp"
+        android:layout_height="75dp"
+        android:layout_marginBottom="60dp"
+        android:background="#181717"
+        android:text="MEDICAL"
+        android:textSize="25dp"
+
+        />
+
+    <Button
+        android:id="@+id/police"
+        style="@style/Widget.AppCompat.Button.Colored"
+        android:layout_width="189dp"
+        android:layout_height="75dp"
+        android:background="#111010"
+        android:text="POLICE"
+        android:textSize="25dp" />
+
+</LinearLayout>
