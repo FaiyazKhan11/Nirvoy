@@ -2,7 +2,9 @@ package com.example.nirvoy;
 
 import android.Manifest;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -128,7 +130,10 @@ public class NavigationActivity extends AppCompatActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            super.onBackPressed();
+            Intent homeIntent = new Intent(Intent.ACTION_MAIN);
+            homeIntent.addCategory( Intent.CATEGORY_HOME );
+            homeIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(homeIntent);
         }
     }
 
@@ -176,7 +181,13 @@ public class NavigationActivity extends AppCompatActivity
 
             FirebaseAuth.getInstance().signOut();
             finish();
-            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+
+            SharedPreferences sharedPreferences = getSharedPreferences("userDetails", Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putString("state","false");
+            editor.commit();
+
+            Intent intent = new Intent(getApplicationContext(), SignInActivity.class);
             startActivity(intent);
 
         }

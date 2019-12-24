@@ -8,6 +8,8 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -15,6 +17,9 @@ public class AddContact extends AppCompatActivity {
 
     private Button addContactButton;
     private EditText nameEditText, numberEditText;
+
+    FirebaseUser user;
+    String uid;
 
     DatabaseReference databaseReference;
 
@@ -24,6 +29,9 @@ public class AddContact extends AppCompatActivity {
         setContentView(R.layout.activity_add_contact);
 
         databaseReference = FirebaseDatabase.getInstance().getReference("ContactDatas");
+
+        user = FirebaseAuth.getInstance().getCurrentUser();
+        uid = user.getUid();
 
         addContactButton = findViewById(R.id.save);
         nameEditText = findViewById(R.id.name);
@@ -46,12 +54,14 @@ public class AddContact extends AppCompatActivity {
 
         ContactData contactData = new ContactData(name,number);
 
-        databaseReference.child(key).setValue(contactData);
+        databaseReference.child(uid).child(key).setValue(contactData);
 
         nameEditText.setText("");
         numberEditText.setText("");
 
         Toast.makeText(this, "New Contact Added", Toast.LENGTH_SHORT).show();
+
+        onBackPressed();
 
     }
 }

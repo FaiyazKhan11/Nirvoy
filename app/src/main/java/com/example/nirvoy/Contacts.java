@@ -10,6 +10,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.FirebaseDatabase;
 
 public class Contacts extends AppCompatActivity {
@@ -17,6 +19,8 @@ public class Contacts extends AppCompatActivity {
     private RecyclerView recyclerView;
     private ContactAdapter adapter;
     private FloatingActionButton add;
+    FirebaseUser user;
+    String uid;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,9 +30,12 @@ public class Contacts extends AppCompatActivity {
         recyclerView = findViewById(R.id.recycler);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
+        user = FirebaseAuth.getInstance().getCurrentUser();
+        uid = user.getUid();
+
         FirebaseRecyclerOptions<ContactData> options =
                 new FirebaseRecyclerOptions.Builder<ContactData>()
-                        .setQuery(FirebaseDatabase.getInstance().getReference().child("ContactDatas"), ContactData.class)
+                        .setQuery(FirebaseDatabase.getInstance().getReference().child("ContactDatas").child(uid), ContactData.class)
                         .build();
 
         adapter = new ContactAdapter(options,this);

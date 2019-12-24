@@ -19,6 +19,8 @@ import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.FirebaseDatabase;
 import com.orhanobut.dialogplus.DialogPlus;
 import com.orhanobut.dialogplus.ViewHolder;
@@ -29,10 +31,14 @@ import java.util.Map;
 public class ContactAdapter extends FirebaseRecyclerAdapter<ContactData, ContactAdapter.PastViewHolder> {
 
     private Context context;
+    FirebaseUser user;
+    String uid;
 
     public ContactAdapter(@NonNull FirebaseRecyclerOptions<ContactData> options,Context context) {
         super(options);
         this.context = context;
+        user = FirebaseAuth.getInstance().getCurrentUser();
+        uid = user.getUid();
     }
 
 
@@ -49,6 +55,7 @@ public class ContactAdapter extends FirebaseRecyclerAdapter<ContactData, Contact
             public void onClick(View view) {
                 FirebaseDatabase.getInstance().getReference()
                         .child("ContactDatas")
+                        .child(uid)
                         .child(getRef(i).getKey())
                         .setValue(null)
                         .addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -91,6 +98,7 @@ public class ContactAdapter extends FirebaseRecyclerAdapter<ContactData, Contact
 
                         FirebaseDatabase.getInstance().getReference()
                                 .child("ContactDatas")
+                                .child(uid)
                                 .child(getRef(i).getKey())
                                 .updateChildren(map)
                                 .addOnCompleteListener(new OnCompleteListener<Void>() {

@@ -1,6 +1,8 @@
 package com.example.nirvoy;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -17,106 +19,131 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+public class MainActivity extends AppCompatActivity {
 
-    private EditText signInEmailEditText, signInPasswordEditText;
-    private TextView signUpTextView;
-    private Button signInButton;
     private ProgressBar progressBar;
-    private FirebaseAuth mAuth;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        this.setTitle("Sign In Activity");
-
-        // Initialize Firebase Auth
-        mAuth = FirebaseAuth.getInstance();
 
         progressBar = findViewById(R.id.progressbarId);
-        signInEmailEditText = findViewById(R.id.signInEmailEditTextId);
-        signInPasswordEditText = findViewById(R.id.signInPasswordEditTextId);
-        signInButton= findViewById(R.id.signInButtonId);
-        signUpTextView = findViewById(R.id.signUpTextViewId);
+        progressBar.setVisibility(View.VISIBLE);
 
-        signUpTextView.setOnClickListener(this);
-        signInButton.setOnClickListener(this);
+        SharedPreferences sharedPreferences = getSharedPreferences("userDetails", Context.MODE_PRIVATE);
+        String isLoggedIn = sharedPreferences.getString("state","false");
+        if(isLoggedIn.equals("true")){
+            if(sharedPreferences.contains("email") && sharedPreferences.contains("password")){
+                progressBar.setVisibility(View.GONE);
+                Intent intent = new Intent(getApplicationContext(), NavigationActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
+            }
+            else{
+                progressBar.setVisibility(View.GONE);
+                Intent intent = new Intent(getApplicationContext(), SignInActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
+            }
+        }
+        else{
+            progressBar.setVisibility(View.GONE);
+            Intent intent = new Intent(getApplicationContext(), SignInActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
+        }
+
+    }
+
+
+    @Override
+    protected void onStart() {
+        SharedPreferences sharedPreferences = getSharedPreferences("userDetails", Context.MODE_PRIVATE);
+        String isLoggedIn = sharedPreferences.getString("state","false");
+        if(isLoggedIn.equals("true")){
+            if(sharedPreferences.contains("email") && sharedPreferences.contains("password")){
+                progressBar.setVisibility(View.GONE);
+                Intent intent = new Intent(getApplicationContext(), NavigationActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
+            }
+            else{
+                progressBar.setVisibility(View.GONE);
+                Intent intent = new Intent(getApplicationContext(), SignInActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
+            }
+        }
+        else{
+            progressBar.setVisibility(View.GONE);
+            Intent intent = new Intent(getApplicationContext(), SignInActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
+        }
+        super.onStart();
     }
 
     @Override
-    public void onClick(View view) {
-
-        switch (view.getId()){
-
-            case R.id.signInButtonId:
-                userLogin();
-                break;
-
-            case R.id.signUpTextViewId:
-                Intent intent = new Intent(getApplicationContext(), SignUpActivity.class);
+    protected void onRestart() {
+        SharedPreferences sharedPreferences = getSharedPreferences("userDetails", Context.MODE_PRIVATE);
+        String isLoggedIn = sharedPreferences.getString("state","false");
+        if(isLoggedIn.equals("true")){
+            if(sharedPreferences.contains("email") && sharedPreferences.contains("password")){
+                progressBar.setVisibility(View.GONE);
+                Intent intent = new Intent(getApplicationContext(), NavigationActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
-                break;
-
+            }
+            else{
+                progressBar.setVisibility(View.GONE);
+                Intent intent = new Intent(getApplicationContext(), SignInActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
+            }
         }
-
+        else{
+            progressBar.setVisibility(View.GONE);
+            Intent intent = new Intent(getApplicationContext(), SignInActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
+        }
+        super.onRestart();
     }
 
-    private void userLogin() {
-
-        String email = signInEmailEditText.getText().toString().trim();
-        String password = signInPasswordEditText.getText().toString().trim();
-
-        //checking the validity of the email
-        if(email.isEmpty())
-        {
-            signInEmailEditText.setError("Enter an email address");
-            signInEmailEditText.requestFocus();
-            return;
-        }
-
-        if(!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches())
-        {
-            signInEmailEditText.setError("Enter a valid email address");
-            signInEmailEditText.requestFocus();
-            return;
-        }
-
-        //checking the validity of the password
-        if(password.isEmpty())
-        {
-            signInPasswordEditText.setError("Enter a password");
-            signInPasswordEditText.requestFocus();
-            return;
-        }
-
-        if(password.length() < 6)
-        {
-            signInPasswordEditText.setError("Minimum length of a password should be 6");
-            signInPasswordEditText.requestFocus();
-            return;
-        }
-
-        progressBar.setVisibility(View.VISIBLE);
-
-        mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-            @Override
-            public void onComplete(@NonNull Task<AuthResult> task) {
-
+    @Override
+    protected void onResume() {
+        SharedPreferences sharedPreferences = getSharedPreferences("userDetails", Context.MODE_PRIVATE);
+        String isLoggedIn = sharedPreferences.getString("state","false");
+        if(isLoggedIn.equals("true")){
+            if(sharedPreferences.contains("email") && sharedPreferences.contains("password")){
                 progressBar.setVisibility(View.GONE);
-                if(task.isSuccessful())
-                {
-                    finish();
-                    Intent intent = new Intent(getApplicationContext(), NavigationActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    startActivity(intent);
-                }
-                else
-                {
-                    Toast.makeText(getApplicationContext(), "Login unsuccessful", Toast.LENGTH_SHORT).show();
-                }
+                Intent intent = new Intent(getApplicationContext(), NavigationActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
             }
-        });
+            else{
+                progressBar.setVisibility(View.GONE);
+                Intent intent = new Intent(getApplicationContext(), SignInActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
+            }
+        }
+        else{
+            progressBar.setVisibility(View.GONE);
+            Intent intent = new Intent(getApplicationContext(), SignInActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
+        }
+        super.onResume();
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent homeIntent = new Intent(Intent.ACTION_MAIN);
+        homeIntent.addCategory( Intent.CATEGORY_HOME );
+        homeIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(homeIntent);
     }
 }
