@@ -14,16 +14,14 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".SignInActivity"></activity>
 
-        <meta-data
-            android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyAhq6Y3eHoQrMY68GsPvgbgxTOmBloaMhw" />
+        <meta-data android:name="com.google.android.geo.API_KEY"
+            android:value="abc" />
 
         <activity
             android:name=".MapActivity"
             android:label="@string/title_activity_map"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"></activity>
         <activity android:name=".PermissionActivity" />
         <activity android:name=".AddContact" />
         <activity android:name=".Contacts" />
