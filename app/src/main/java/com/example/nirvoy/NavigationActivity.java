@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.Menu;
@@ -28,12 +29,14 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class NavigationActivity extends AppCompatActivity
@@ -42,13 +45,22 @@ public class NavigationActivity extends AppCompatActivity
     FirebaseAuth mAuth;
     Button medicalButton,policeButton;
     DatabaseReference databaseReference,deleteReference;
-    private List<ContactData> contactDataList;
+    public ArrayList<String> contactDataList;
+    public String msg;
+    FirebaseUser user;
+    String uid;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         mAuth = FirebaseAuth.getInstance();
         super.onCreate(savedInstanceState);
+
+        user = FirebaseAuth.getInstance().getCurrentUser();
+        uid = user.getUid();
+
+        contactDataList = new ArrayList<String>();
+
         setContentView(R.layout.activity_navigation);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -69,23 +81,27 @@ public class NavigationActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
         medicalButton = findViewById(R.id.medical);
         policeButton = findViewById(R.id.police);
-        databaseReference = FirebaseDatabase.getInstance().getReference("ContactDatas");
+        databaseReference = FirebaseDatabase.getInstance().getReference("ContactDatas").child(uid);
+
+
+
         medicalButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String msg = "Medical Emergency!!!!";
-                startActivity(new Intent(NavigationActivity.this, MapActivity.class));
-                //buttonPressed(msg);
-//                Log.d("click", "onClick: ");
+                msg = "Medical Emergency!!!!";
+                Intent intent = new Intent(NavigationActivity.this, MapActivity.class);
+                intent.putExtra("msg",msg);
+                startActivity(intent);
             }
         });
         policeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String msg = "Police Help!!!!";
-                startActivity(new Intent(NavigationActivity.this, MapActivity.class));
-                //buttonPressed(msg);
-//                Log.d("click", "onClick: ");
+                msg = "Police Help!!!!";
+                Intent intent = new Intent(NavigationActivity.this, MapActivity.class);
+                intent.putExtra("msg",msg);
+                startActivity(intent);
+
             }
         });
     }
@@ -94,34 +110,6 @@ public class NavigationActivity extends AppCompatActivity
     protected void onStart() {
 
         super.onStart();
-    }
-
-
-    private void buttonPressed(String msg) {
-        final String message = msg;
-        databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for(DataSnapshot dataSnapshot1:dataSnapshot.getChildren()){
-                    ContactData contactData = dataSnapshot1.getValue(ContactData.class);
-                    Log.d("contacts", contactData.getNumber()+"\n");
-                    String number = contactData.getNumber();
-//                    sendMessage(message,number);
-                    Toast.makeText(NavigationActivity.this, "Sending message to "+number, Toast.LENGTH_SHORT).show();
-                    Log.d("message", "onDataChange: "+number);
-//                    call(number);
-
-                }
-
-            }
-
-
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                Toast.makeText(NavigationActivity.this, "Some Error Occured", Toast.LENGTH_SHORT).show();
-            }
-        });
     }
 
     @Override
@@ -195,33 +183,6 @@ public class NavigationActivity extends AppCompatActivity
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
-    }
-
-
-    private void call(String number){
-        Intent callIntent = new Intent(Intent.ACTION_CALL);
-        callIntent.setData(Uri.parse("tel:"+number));
-
-        if (ActivityCompat.checkSelfPermission(NavigationActivity.this,
-                Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
-        startActivity(callIntent);
-    }
-
-
-    private void sendMessage(String msg ,String number){
-
-        //Getting intent and PendingIntent instance
-        Intent intent = new Intent(getApplicationContext(), NavigationActivity.class);
-        PendingIntent pi = PendingIntent.getActivity(getApplicationContext(), 0, intent, 0);
-
-        //Get the SmsManager instance and call the sendTextMessage method to send message
-        SmsManager sms = SmsManager.getDefault();
-        sms.sendTextMessage(number, null, msg, pi, null);
-
-        Toast.makeText(getApplicationContext(), "Message Sent successfully!",
-                Toast.LENGTH_LONG).show();
     }
 
 }

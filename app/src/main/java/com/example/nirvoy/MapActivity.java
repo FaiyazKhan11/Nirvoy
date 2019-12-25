@@ -1,10 +1,16 @@
 package com.example.nirvoy;
 
+import android.Manifest;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 
 import com.google.android.gms.common.api.ResolvableApiException;
@@ -31,13 +37,22 @@ import com.google.android.libraries.places.api.model.AutocompleteSessionToken;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.mancj.materialsearchbar.MaterialSearchBar;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
 
+import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -45,6 +60,7 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -64,12 +80,22 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     private final float DEFAULT_ZOOM = 18;
 
-    String address;
+    DatabaseReference databaseReference;
+    FirebaseUser user;
+    String uid;
+
+    String address,msg;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
+
+        msg = getIntent().getStringExtra("msg");
+
+
+        user = FirebaseAuth.getInstance().getCurrentUser();
+        uid = user.getUid();
 
         materialSearchBar = findViewById(R.id.searchBar);
         btnHelp = findViewById(R.id.btn_help);
@@ -83,10 +109,13 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         placesClient = Places.createClient(this);
         AutocompleteSessionToken token = AutocompleteSessionToken.newInstance();
 
+        databaseReference = FirebaseDatabase.getInstance().getReference("ContactDatas").child(uid);
+
         btnHelp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Toast.makeText(getApplicationContext(), address, Toast.LENGTH_LONG).show();
+                buttonPressed(msg);
             }
         });
 
@@ -233,4 +262,62 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
         return current_address;
     }
+
+
+    private void buttonPressed(String msg) {
+        final String message = msg;
+        databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for(DataSnapshot dataSnapshot1:dataSnapshot.getChildren()){
+                    ContactData contactData = dataSnapshot1.getValue(ContactData.class);
+                    Log.d("contacts", contactData.getNumber()+"\n");
+                    String number = contactData.getNumber();
+//                    sendMessage(message,number);
+                    Toast.makeText(MapActivity.this, "Sending message to "+number, Toast.LENGTH_SHORT).show();
+                    Log.d("message", "onDataChange: "+number);
+                    call(number);
+
+                }
+
+            }
+
+
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Toast.makeText(MapActivity.this, "Some Error Occured", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+
+    private void call(String number){
+        Intent callIntent = new Intent(Intent.ACTION_CALL);
+        callIntent.setData(Uri.parse("tel:"+number));
+
+        if (ActivityCompat.checkSelfPermission(MapActivity.this,
+                Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        startActivity(callIntent);
+    }
+
+
+    private void sendMessage(String msg ,String number){
+
+        //Getting intent and PendingIntent instance
+        Intent intent = new Intent(getApplicationContext(), NavigationActivity.class);
+        PendingIntent pi = PendingIntent.getActivity(getApplicationContext(), 0, intent, 0);
+
+        //Get the SmsManager instance and call the sendTextMessage method to send message
+        SmsManager sms = SmsManager.getDefault();
+        sms.sendTextMessage(number, null, msg, pi, null);
+
+        Toast.makeText(getApplicationContext(), "Message Sent successfully!",
+                Toast.LENGTH_LONG).show();
+    }
+
+
+
 }
