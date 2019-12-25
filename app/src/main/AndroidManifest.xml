@@ -30,6 +30,7 @@
             android:label="@string/title_activity_navigation"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".SignUpActivity" />
+        <activity android:name=".SignInActivity" />
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
